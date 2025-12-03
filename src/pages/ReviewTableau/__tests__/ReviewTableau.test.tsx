@@ -33,10 +33,14 @@ vi.mock('../../../components/Table/Table', () => ({
 const mockApiResponse = {
   responses_by_round: {
     "1": {
-      "1": {
-        description: "Rate the overall quality",
-        question_type: "Scale",
-        answers: { values: [4, 5], comments: ["Good work", "Excellent"] }
+      min_answer_value: 1,
+      max_answer_value: 5,
+      items: {
+        "1": {
+          description: "Rate the overall quality",
+          question_type: "Scale",
+          answers: { values: [4, 5], comments: ["Good work", "Excellent"] }
+        }
       }
     }
   },
@@ -141,20 +145,24 @@ describe('ReviewTableau Component', () => {
     const mixedApiResponse = {
       responses_by_round: {
         "1": {
-          "1": {
-            description: "Rate quality",
-            question_type: "Scale",
-            answers: { values: [4], comments: ["Good"] }
-          },
-          "2": {
-            description: "Technical accuracy", 
-            question_type: "Criterion",
-            answers: { values: [3], comments: ["Needs work"] }
-          },
-          "3": {
-            description: "Choose option",
-            question_type: "Dropdown", 
-            answers: { values: [1], comments: ["Option A"] }
+          min_answer_value: 1,
+          max_answer_value: 5,
+          items: {
+            "1": {
+              description: "Rate quality",
+              question_type: "Scale",
+              answers: { values: [4], comments: ["Good"] }
+            },
+            "2": {
+              description: "Technical accuracy", 
+              question_type: "Criterion",
+              answers: { values: [3], comments: ["Needs work"] }
+            },
+            "3": {
+              description: "Choose option",
+              question_type: "Dropdown", 
+              answers: { values: [1], comments: ["Option A"] }
+            }
           }
         }
       },
@@ -193,7 +201,8 @@ describe('ReviewTableau Component', () => {
       expect(screen.getByText('Reviews By student1')).toBeInTheDocument();
     });
     
-    expect(screen.getByText('Mixed Question Types Rubric')).toBeInTheDocument();
+    // Since we removed the rubric title display, check for the round title instead
+    expect(screen.getByText('Review Round 1')).toBeInTheDocument();
     
     expect(screen.getByTestId('mock-table')).toBeInTheDocument();
     
