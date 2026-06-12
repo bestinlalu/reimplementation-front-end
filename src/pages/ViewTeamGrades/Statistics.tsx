@@ -1,7 +1,7 @@
 // Statistics.tsx
 import React, { useEffect } from "react";
-import { calculateAverages, normalizeReviewDataArray } from "./utils";
-import "./grades.scss";
+import { calculateAverages, normalizeReviewDataArray } from "./heatgridUtils";
+import styles from "./ViewTeamGrades.module.scss"
 
 //props for statistics component
 interface StatisticsProps {
@@ -23,7 +23,8 @@ const Statistics: React.FC<StatisticsProps> = ({ roundsSource = null }) => {
       normalizedData,
       "asc"
     );
-    const rowAvgArray = sortedData.map((item) => item.RowAvg);
+    // Filter out SectionHeader sentinels before accessing ReviewData-only fields
+    const rowAvgArray = sortedData.filter(item => !('type' in item)).map((item: any) => item.RowAvg);
     console.log(rowAvgArray);
   }, [roundsSource]);
 

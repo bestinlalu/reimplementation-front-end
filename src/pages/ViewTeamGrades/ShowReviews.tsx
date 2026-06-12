@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getColorClass } from "./utils";
+import { getColorClass } from "./heatgridUtils";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
 
@@ -47,7 +47,8 @@ interface ReviewComment {
 
 interface Review {
   questionNumber: string;
-  questionText: string;
+  questionText?: string;
+  itemText?: string; // alias used by ReviewData from App.tsx
   itemType?: string;
   reviews: ReviewComment[];
   RowAvg: number;
@@ -203,7 +204,7 @@ const CollapsibleReview: React.FC<{
           {roundData.map((question, j) => (
             <div key={`question-${j}-review-${reviewIndex}`} className="review-block" style={{ marginBottom: "15px", minWidth: "max-content" }}>
               <div className="question" style={{ fontWeight: "bold", marginBottom: "8px", fontSize: "14px", whiteSpace: "nowrap" }}>
-                {j + 1}. {question.questionText}
+                {j + 1}. {question.itemText || question.questionText}
               </div>
               <div className="score-container" style={{ marginLeft: "15px" }}>
                 {question.reviews[reviewIndex].score !== undefined ? (
@@ -219,14 +220,14 @@ const CollapsibleReview: React.FC<{
                     </span>
                     {question.reviews[reviewIndex].comment && (
                       <div className="comment" style={{ marginTop: "5px", fontSize: "14px", color: "#555" }}>
-                        <TruncatableText text={question.reviews[reviewIndex].comment!} wordLimit={10} />
+                        <TruncatableText text={question.reviews[reviewIndex].comment!} wordLimit={50} />
                       </div>
                     )}
                   </>
                 ) : question.reviews[reviewIndex].textResponse ? (
                   // Text items (TextArea, TextField)
                   <div style={{ fontSize: "14px", color: "#555", fontStyle: "italic" }}>
-                    <TruncatableText text={question.reviews[reviewIndex].textResponse!} wordLimit={15} />
+                    <TruncatableText text={question.reviews[reviewIndex].textResponse!} wordLimit={50} />
                   </div>
                 ) : question.reviews[reviewIndex].selections ? (
                   // Multi-select items (Checkbox)

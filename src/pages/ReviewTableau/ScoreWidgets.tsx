@@ -1,7 +1,6 @@
 import React from 'react';
-import { getColorClass } from '../ViewTeamGrades/utils';
+import { getColorClass } from '../ViewTeamGrades/heatgridUtils';
 import { ScoreWidgetProps } from '../../types/reviewTableau';
-import '../ViewTeamGrades/grades.scss';
 
 /**
  * Reusable circular score widget that matches the design used in ViewTeamGrades
