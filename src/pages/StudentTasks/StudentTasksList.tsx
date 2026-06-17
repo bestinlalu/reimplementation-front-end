@@ -2,9 +2,9 @@
  * StudentTasksList (rendered as the sidebar "StudentTasksBox") — shows three sections:
  *
  * 1. "Tasks not yet started" — assignments where the participant has not submitted
- *    anything yet (notStarted flag set by the backend). Shows days remaining.
+ *    anything yet (started=false, set by the backend). Shows days remaining.
  *
- * 2. "Revisions" — assignments currently in a revision stage (revise flag). Each
+ * 2. "Revisions" — assignments currently in a revision stage (submissionUpdated flag). Each
  *    entry links to /student_review/list/:participantId so the student can act on feedback.
  *
  * 3. "Students who have teamed with you" — fetched independently via GET /student_tasks/team,
@@ -22,8 +22,8 @@ import axiosClient from 'utils/axios_client';
 export type Revision = {
   name: string;
   dueDate: string;
-  revise: boolean;
-  notStarted: boolean;
+  submissionUpdated: boolean;
+  started: boolean;
   currentStage: string;
   participantId: number;
 };
@@ -63,8 +63,8 @@ const StudentTasksList: React.FC<StudentTasksListProps> = ({ revisions }) => {
     return daysDiff > 0 ? daysDiff : 0;
   };
 
-  const revisedTasks = revisions.filter((r) => r.revise);
-  const notStartedTasks = revisions.filter((r) => r.notStarted);
+  const submissionUpdateddTasks = revisions.filter((r) => r.submissionUpdated);
+  const notStartedTasks = revisions.filter((r) => !r.started);
 
   return (
     <div className={styles.taskbox}>
@@ -82,9 +82,9 @@ const StudentTasksList: React.FC<StudentTasksListProps> = ({ revisions }) => {
       </div>
 
       <div className={styles.section}>
-        <span className={styles.greyBadge}>{revisedTasks.length}</span>&nbsp;
+        <span className={styles.greyBadge}>{submissionUpdateddTasks.length}</span>&nbsp;
         <strong>Revisions</strong>
-        {revisedTasks.map((task, index) => {
+        {submissionUpdateddTasks.map((task, index) => {
           const daysLeft = calculateDaysLeft(task.dueDate);
           return (
             <div key={index}>

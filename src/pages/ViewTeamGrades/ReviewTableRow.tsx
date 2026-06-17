@@ -27,7 +27,7 @@ const STICKY_NO_WIDTH = 68; // wide enough for two-digit item numbers + weight b
 const STICKY_Q_WIDTH  = 340;
 
 const cellBase: React.CSSProperties = {
-  padding: "8px 10px",
+  padding: "4px 10px",
   verticalAlign: "top",
   border: "1px solid #ddd",
   fontSize: "13px",
@@ -102,7 +102,7 @@ const ReviewTableRow: React.FC<ReviewTableRowProps> = ({ row, rowIndex, onReview
       <td
         key={idx}
         className={bgClass}            // c1–c5/cf — :global in CSS module
-        data-question={review.comment || review.textResponse || ''}
+        data-question={review.comment || undefined}
         style={{
           ...reviewerCell,
           cursor: onReviewClick ? "pointer" : "default",

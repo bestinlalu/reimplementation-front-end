@@ -87,6 +87,10 @@ const StudentTaskDetail: React.FC = () => {
     fetchTaskDetails();
   }, [id]);
 
+  // Permissions from the participant object in the API response
+  const canSubmit = apiData?.participant?.can_submit !== false;
+  const canReview = apiData?.participant?.can_review !== false;
+
   // Router state has camelCase summary fields; API has snake_case + due_dates
   const assignment = stateData?.task?.assignment || apiData?.assignment || "Unknown Assignment";
   const current_stage = stateData?.task?.currentStage || apiData?.current_stage || "Not Started";
@@ -180,30 +184,33 @@ const StudentTaskDetail: React.FC = () => {
       </div>
 
 
-      <Link
-        to={`/email_the_authors/`} // Placeholder route for emailing reviewers; adjust as needed
-        className={styles.emailButton}
-      >
-        Send Email To Reviewers
-      </Link>
-
-      <div className={styles.taskLinks}>
+      <div className={styles.taskLinks} style={{ position: "relative" }}>
+        <Link
+          to={`/email_the_authors/`} // Placeholder route for emailing reviewers; adjust as needed
+          className={styles.emailButton}
+        >
+          Send Email To Reviewers
+        </Link>
         <ul className={styles.taskList}>
           <li className={styles.taskItem}>
             <Link to={`/program/${id}/team`} // Placeholder route for team details; adjust as needed
             className={styles.clickableLink}>Your team</Link> 
             <span className={styles.taskDescription}> (View and manage your team)</span>
           </li>
-          <li className={styles.taskItem}>
-            <Link to={`/program/${id}/work`} // Placeholder route for work details; adjust as needed
-            className={styles.clickableLink}>Your work</Link>
-            <span className={styles.taskDescription}> (View your work)</span>
-          </li>
-          <li className={styles.taskItem}>
-            <Link to="/reviews" // Route for reviews; adjust as needed
-            className={styles.clickableLink}>Others' work</Link>
-            <span className={styles.taskDescription}> (Give feedback to others on their work)</span>
-          </li>
+          {canSubmit && (
+            <li className={styles.taskItem}>
+              <Link to={`/program/${id}/work`} // Placeholder route for work details; adjust as needed
+              className={styles.clickableLink}>Your work</Link>
+              <span className={styles.taskDescription}> (View your work)</span>
+            </li>
+          )}
+          {canReview && (
+            <li className={styles.taskItem}>
+              <Link to="/reviews" // Route for reviews; adjust as needed
+              className={styles.clickableLink}>Others' work</Link>
+              <span className={styles.taskDescription}> (Give feedback to others on their work)</span>
+            </li>
+          )}
           <li className={styles.taskItem}>
             <Link to={`/view-team-grades?assignmentId=${stateData?.assignmentId ?? id}`}
             className={styles.clickableLink}>Your feedbacks</Link>
@@ -218,7 +225,7 @@ const StudentTaskDetail: React.FC = () => {
       </div>
 
       {/* Unified Timeline Container Wrapper */}
-      <div style={{ maxWidth: '1400px', margin: '6rem auto' }}>
+      <div style={{ maxWidth: '1400px', margin: '1.5rem auto' }}>
         <div className={styles.timelineContainer}>
           
           {/* Row 1: Calendar Date Headings */}

@@ -177,12 +177,12 @@ const ReviewTable: React.FC = () => {
     return (
       <div key={roundIndex} style={{ marginBottom: 32 }}>
         <h2>
-          Review (Round: {roundIndex + 1} of {roundsSource.length})
+          Round {roundIndex + 1}
         </h2>
 
         {/* Horizontally scrollable wrapper — identical to FeedbackTable */}
         <div style={{ overflowX: "auto", position: "relative" }}>
-          <table style={{
+          <table className={styles.tbl_heat} style={{
             borderCollapse: "separate",
             borderSpacing: 0,
             tableLayout: "fixed",
@@ -237,25 +237,35 @@ const ReviewTable: React.FC = () => {
               {(() => {
                 let scoredRowIdx = 0;
                 return sortedData.map((row, index) => {
-                  // Render SectionHeader sentinel as a full-width heading row
+                  // Render SectionHeader sentinel as a heading row.
+                  // Split into two cells so the label stays sticky on horizontal scroll:
+                  //   cell 1 — sticky, covers the # col + question col (68 + 340 px)
+                  //   cell 2 — colSpan for all reviewer columns, scrolls away
                   if (isHeader(row)) {
                     return (
                       <tr key={`hdr-${index}`}>
                         <td
-                          colSpan={numReviewers + 2}
+                          colSpan={2}
                           style={{
-                            padding: "10px 14px",
+                            padding: "6px 14px",
                             background: "#fff",
                             fontWeight: "bold",
                             fontSize: "14px",
                             fontFamily: "verdana, arial, helvetica, sans-serif",
                             color: "#986633",
-                            position: "relative",
+                            position: "sticky",
+                            left: 0,
                             zIndex: 4,
+                            width: STICKY_NO_WIDTH + STICKY_Q_WIDTH,
+                            minWidth: STICKY_NO_WIDTH + STICKY_Q_WIDTH,
                           }}
                         >
                           {row.txt}
                         </td>
+                        <td
+                          colSpan={numReviewers}
+                          style={{ background: "#fff", borderBottom: "1px solid #ddd" }}
+                        />
                       </tr>
                     );
                   }

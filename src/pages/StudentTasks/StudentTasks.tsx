@@ -10,7 +10,7 @@
  *
  * 1. Data fetching — one GET /student_tasks/list call returns all assignments the
  *    logged-in student participates in. Each item contains the participant record,
- *    current stage, review grade, stage deadline, and derived flags (revise, notStarted).
+ *    current stage, review grade, stage deadline, and derived flags (submissionUpdated, notStarted).
  *
  * 2. Parsing — parseStudentTasks() normalises the raw API shape into a typed Task[].
  *    Fields are read with ?? fallbacks to tolerate both flat and nested response shapes
@@ -51,8 +51,8 @@ type Task = {
   badges: string | boolean;
   stageDeadline: string;
   showAsExample: boolean;
-  revise: boolean;
-  notStarted: boolean;
+  submissionUpdated: boolean;
+  started: boolean;
 };
 
 const StudentTasks: React.FC = () => {
@@ -97,8 +97,8 @@ const StudentTasks: React.FC = () => {
         badges: item.badges ?? false,
         stageDeadline: item.stage_deadline ?? participant.stage_deadline ?? "",
         showAsExample: item.permission_granted ?? participant.permission_granted ?? false,
-        revise: item.revise ?? false,
-        notStarted: item.not_started ?? false,
+        submissionUpdated: item.submission_updated ?? false,
+        started: item.started ?? false,
       };
     });
   }
@@ -106,15 +106,15 @@ const StudentTasks: React.FC = () => {
   /**
    * Converts the Task list into the Revision[] shape expected by StudentTasksBox.
    * Strips the ISO timestamp from stageDeadline so the sidebar shows only the date part.
-   * revise and notStarted flags are computed by the backend based on current stage and
+   * submissionUpdated and started flags are computed by the backend based on current stage and
    * whether the participant has submitted any work.
    */
   function extractAssignments(tasksList: Task[]): Revision[] {
     return tasksList.map((task) => ({
       name: task.assignment,
       dueDate: task.stageDeadline ? task.stageDeadline.split("T")[0] : "N/A",
-      revise: task.revise,
-      notStarted: task.notStarted,
+      submissionUpdated: task.submissionUpdated,
+      started: task.started,
       currentStage: task.currentStage,
       participantId: task.id,
     }));
@@ -214,7 +214,7 @@ const StudentTasks: React.FC = () => {
 
   return (
     <div className="assignments-page">
-      <h1 className="assignments-title">Assignments</h1>
+      <h1 className={styles['assignments-title']}>Assignments</h1>
       <div className={styles.pageLayout}>
         <aside className={styles.sidebar}>
           <StudentTasksBox

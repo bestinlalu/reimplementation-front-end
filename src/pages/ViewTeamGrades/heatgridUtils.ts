@@ -35,11 +35,13 @@ export const convertBackendRoundArray = (backendRounds: any[][]): RoundRow[][] =
   if (!Array.isArray(backendRounds)) return [];
   return backendRounds.map((backendRound) => {
     if (!Array.isArray(backendRound)) return [];
-    return backendRound.map((answersArray: any, idx: number) => {
-      // Pass SectionHeader sentinels through unchanged
+    let scoredItemCount = 0;
+    return backendRound.map((answersArray: any) => {
+      // Pass SectionHeader sentinels through unchanged — do NOT increment the counter
       if (answersArray && !Array.isArray(answersArray) && answersArray.type === "header") {
         return answersArray as SectionHeaderData;
       }
+      scoredItemCount += 1;
       const firstAnswer = answersArray?.[0];
       const itemType = firstAnswer?.item_type || firstAnswer?.itemType;
 
@@ -84,7 +86,7 @@ export const convertBackendRoundArray = (backendRounds: any[][]): RoundRow[][] =
       const maxScore = reviews.every((r: any) => r.score === 0 || r.score === 1) ? 1 : 5;
 
       return {
-        itemNumber: String(idx + 1),
+        itemNumber: String(scoredItemCount),
         itemText: (answersArray && answersArray[0] && answersArray[0].txt) || '',
         itemType,
         reviews,

@@ -86,7 +86,7 @@ const RoundFeedbackTable: React.FC<{ roundData: RoundRow[]; roundIndex: number; 
 
   return (
     <div style={{ marginBottom: 32 }}>
-      <h2 style={{ marginBottom: 8 }}>Review (Round: {roundIndex + 1} of {totalRounds})</h2>
+      <h2 style={{ marginBottom: 8 }}>Round {roundIndex + 1}</h2>
 
       {/* Outer wrapper with horizontal scroll */}
       <div style={{ overflowX: "auto", position: "relative" }}>
@@ -152,25 +152,35 @@ const RoundFeedbackTable: React.FC<{ roundData: RoundRow[]; roundIndex: number; 
             {(() => {
               let scoredRowIdx = 0;
               return roundData.map((row, idx) => {
-                // SectionHeader sentinel → full-width heading row spanning all columns
+                // SectionHeader sentinel → heading row with sticky label.
+                // Split into two cells so the label stays fixed on horizontal scroll:
+                //   cell 1 — sticky, covers the # col + question col (68 + 340 px)
+                //   cell 2 — colSpan for all reviewer columns, scrolls away
                 if (isHeader(row)) {
                   return (
                     <tr key={`hdr-${idx}`}>
                       <td
-                        colSpan={numReviewers + 2}
+                        colSpan={2}
                         style={{
-                          padding: "10px 14px",
+                          padding: "6px 14px",
                           background: "#fff",
                           fontWeight: "bold",
                           fontSize: "14px",
                           fontFamily: "verdana, arial, helvetica, sans-serif",
                           color: "#986633",
-                          position: "relative",
+                          position: "sticky",
+                          left: 0,
                           zIndex: 4,
+                          width: STICKY_NO_WIDTH + STICKY_Q_WIDTH,
+                          minWidth: STICKY_NO_WIDTH + STICKY_Q_WIDTH,
                         }}
                       >
                         {row.txt}
                       </td>
+                      <td
+                        colSpan={numReviewers}
+                        style={{ background: "#fff", borderBottom: "1px solid #ddd" }}
+                      />
                     </tr>
                   );
                 }

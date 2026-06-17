@@ -142,7 +142,7 @@
 
 /* Styling for the heatgrid table */
 .tbl_heat {
-  border: 1px solid black;
+  border: 1px solid #ddd;
   width: 100%;
   font-size: 15px;
   text-align: center;
@@ -153,7 +153,7 @@
 .tbl_heat td {
   cursor: pointer;
   padding: 2px;
-  border: 1px black solid;
+  border: 1px solid #ddd;
   width: auto;
   font-size: 15px;
   line-height: 1.428em;
