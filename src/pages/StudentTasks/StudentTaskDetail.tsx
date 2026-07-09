@@ -2,16 +2,15 @@
  * StudentTaskDetail — the per-assignment detail page reached by clicking an assignment
  * name in the StudentTasks dashboard.
  *
- * Two data sources are combined:
+ * Three data sources are combined:
  *   - router state (location.state): summary fields (assignment name, currentStage, etc.)
- *     passed via Link state= in StudentTasks. These are available immediately, so the page
- *     renders a meaningful header before the API responds.
- *   - GET /student_tasks/show/:participantId: full task data including due_dates[]. This
- *     is always fetched — router state deliberately omits due_dates to avoid serialising
- *     large arrays into navigation history.
+ *     passed via Link state= in StudentTasks. Available immediately for a fast header render.
+ *   - GET /student_tasks/show/:participantId: full task data (permissions, stage, etc.)
+ *   - GET /participants/:participantId/timeline: due dates and submitted review activity.
+ *     Fetched separately so the detail page renders immediately and the timeline loads independently.
  *
  * Timeline rendering:
- *   - due_dates are sorted by date and displayed as three aligned rows:
+ *   - timeline entries are sorted by date and displayed as three aligned rows:
  *       Row 1: formatted date + time labels
  *       Row 2: visual track line with coloured nodes (completed=red filled, current=pulsing,
  *               pending=grey outline)
@@ -20,7 +19,7 @@
  *     advances to the midpoint of the current stage node.
  *   - Date parsing handles both ISO (YYYY-MM-DD) and legacy dd-mm-yyyy formats from the API.
  *
- * "Your feedbacks" link navigates to /view-team-grades?assignmentId=X, using the
+ * "Your feedback" link navigates to /view-team-grades?assignmentId=X, using the
  * assignmentId passed via router state (participant.parent_id on the backend).
  */
 import React, { useState, useEffect, useMemo } from "react";
@@ -41,7 +40,6 @@ interface TaskData {
   badges: boolean;
   course: string;
   currentStage: string;
-  due_dates: DueDates[];
   id: number;
   publishingRights: boolean;
   reviewGrade: string;
@@ -63,9 +61,12 @@ const StudentTaskDetail: React.FC = () => {
   // 1. Establish a single, consistent baseline instance for "today"
   const today = useMemo(() => new Date(), []);
 
-  // 2. Always fetch full task data from API (router state lacks due_dates)
+  // 2. Fetch task details and timeline events independently
   const [apiData, setApiData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [timelineData, setTimelineData] = useState<DueDates[]>([]);
+  const [isTimelineLoading, setIsTimelineLoading] = useState(true);
 
   useEffect(() => {
     const fetchTaskDetails = async () => {
@@ -84,7 +85,20 @@ const StudentTaskDetail: React.FC = () => {
       }
     };
 
+    const fetchTimeline = async () => {
+      try {
+        setIsTimelineLoading(true);
+        const response = await axiosClient.get(`/participants/${id}/timeline`);
+        setTimelineData(response.data);
+      } catch (error: any) {
+        console.error("Error fetching timeline:", error);
+      } finally {
+        setIsTimelineLoading(false);
+      }
+    };
+
     fetchTaskDetails();
+    fetchTimeline();
   }, [id]);
 
   // Permissions from the participant object in the API response
@@ -92,21 +106,21 @@ const StudentTaskDetail: React.FC = () => {
   const canReview = apiData?.participant?.can_review !== false;
 
   // Router state has camelCase summary fields; API has snake_case + due_dates
-  const assignment = stateData?.task?.assignment || apiData?.assignment || "Unknown Assignment";
-  const current_stage = stateData?.task?.currentStage || apiData?.current_stage || "Not Started";
+  const assignment = apiData?.assignment || stateData?.task?.assignment || "Unknown Assignment";
+  const current_stage = apiData?.current_stage || stateData?.task?.currentStage || "Not Started";
 
-  // Parse due_dates from the API response. The backend may return dates in either
-  // ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ) or legacy dd-mm-yyyy HH:MM:SS format.
+  // Parse timeline entries from the dedicated timeline API response.
+  // The backend may return dates in ISO 8601 (YYYY-MM-DDTHH:MM:SSZ) or legacy dd-mm-yyyy HH:MM:SS format.
   // Only the legacy format is reformatted — ISO strings already parse correctly in all browsers.
   const due_dates: DueDates[] = useMemo(() => {
-    return (apiData?.due_dates || []).map((due: any) => {
+    const normalized = timelineData.map((due: any) => {
       let safeDateString = due.date;
 
       // Only reformat dd-mm-yyyy strings; skip ISO dates (which already start YYYY-)
       if (due.date && due.date.includes('-') && !/^\d{4}-/.test(due.date)) {
         const [datePart, timePart] = due.date.split(' ');
         const [day, month, year] = datePart.split('-');
-        safeDateString = `${year}-${month}-${day}T${timePart}Z`;
+        safeDateString = `${year}-${month}-${day}T${timePart || "00:00:00"}`;
       }
 
       return {
@@ -117,7 +131,10 @@ const StudentTaskDetail: React.FC = () => {
         round: due.round ?? null
       };
     });
-  }, [apiData?.due_dates]);
+    return normalized.sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+  }, [timelineData]);
 
   /**
    * Determines the visual status of a due-date node for the timeline.
@@ -176,49 +193,47 @@ const StudentTaskDetail: React.FC = () => {
       <div className={styles.header}>
         <h1>
           Submit or Review work for{" "}
-          <Link to={`/program/${id}`} // Placeholder route for program details; adjust as needed
-          className={styles.programLink} style={{ color: 'black' }}>
+          <span className={styles.programLink} style={{ color: 'black' }}>
             {assignment}
-          </Link>
+          </span>
         </h1>
       </div>
 
 
       <div className={styles.taskLinks} style={{ position: "relative" }}>
         <Link
-          to={`/email_the_authors/`} // Placeholder route for emailing reviewers; adjust as needed
+          to="/email_the_author"
           className={styles.emailButton}
         >
           Send Email To Reviewers
         </Link>
         <ul className={styles.taskList}>
           <li className={styles.taskItem}>
-            <Link to={`/program/${id}/team`} // Placeholder route for team details; adjust as needed
-            className={styles.clickableLink}>Your team</Link> 
+            <Link to="/student_teams/view" className={styles.clickableLink}>Your team</Link>
             <span className={styles.taskDescription}> (View and manage your team)</span>
           </li>
           {canSubmit && (
             <li className={styles.taskItem}>
-              <Link to={`/program/${id}/work`} // Placeholder route for work details; adjust as needed
-              className={styles.clickableLink}>Your work</Link>
+              <Link to={`/student_tasks/${id}`} className={styles.clickableLink}>Your work</Link>
               <span className={styles.taskDescription}> (View your work)</span>
             </li>
           )}
           {canReview && (
             <li className={styles.taskItem}>
-              <Link to="/reviews" // Route for reviews; adjust as needed
-              className={styles.clickableLink}>Others' work</Link>
+              <Link to="/reviews" className={styles.clickableLink}>Others' work</Link>
               <span className={styles.taskDescription}> (Give feedback to others on their work)</span>
             </li>
           )}
+          {(stateData?.assignmentId ?? apiData?.participant?.parent_id) != null && (
+            <li className={styles.taskItem}>
+              <Link
+                to={`/view-team-grades?assignmentId=${stateData?.assignmentId ?? apiData?.participant?.parent_id}`}
+                className={styles.clickableLink}>Your feedback</Link>
+              <span className={styles.taskDescription}> (View scores and feedback on your work)</span>
+            </li>
+          )}
           <li className={styles.taskItem}>
-            <Link to={`/view-team-grades?assignmentId=${stateData?.assignmentId ?? id}`}
-            className={styles.clickableLink}>Your feedbacks</Link>
-            <span className={styles.taskDescription}> (View scores and feedback on your work)</span>
-          </li>
-          <li className={styles.taskItem}>
-            <Link to="/profile" // Route for profile; adjust as needed
-            className={styles.clickableLink}>Change your handle</Link>
+            <Link to="/profile" className={styles.clickableLink}>Change your handle</Link>
             <span className={styles.taskDescription}> (Provide a different handle for this assignment)</span>
           </li>
         </ul>
@@ -226,6 +241,9 @@ const StudentTaskDetail: React.FC = () => {
 
       {/* Unified Timeline Container Wrapper */}
       <div style={{ maxWidth: '1400px', margin: '1.5rem auto' }}>
+        {isTimelineLoading ? (
+          <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>Loading timeline...</div>
+        ) : due_dates.length === 0 ? null : (
         <div className={styles.timelineContainer}>
           
           {/* Row 1: Calendar Date Headings */}
@@ -325,8 +343,9 @@ const StudentTaskDetail: React.FC = () => {
           </div>
 
         </div>
+        )}
       </div>
-      
+
       <div style={{ marginTop: '30px' }}>
         <Link to="/student_tasks" className={styles.clickableLink}>
           Back

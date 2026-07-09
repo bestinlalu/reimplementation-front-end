@@ -255,11 +255,8 @@ const RoundFeedbackTable: React.FC<{ roundData: RoundRow[]; roundIndex: number; 
 };
 
 const FeedbackTable: React.FC<FeedbackTableProps> = ({ data, roundSelected }) => {
-  const auth = useSelector(
-    (state: RootState) => state.authentication,
-    (prev, next) => prev.isAuthenticated === next.isAuthenticated
-  );
-  const isStudent = auth.user.role === "Student";
+  const role = useSelector((state: RootState) => state.authentication.user?.role);
+  const isStudent = role === "Student";
 
   if (!data || data.length === 0) {
     return <div style={{ color: "#888", padding: 16 }}>No feedback data available.</div>;
@@ -268,9 +265,8 @@ const FeedbackTable: React.FC<FeedbackTableProps> = ({ data, roundSelected }) =>
   return (
     <div>
       {data.map((roundData: RoundRow[], roundIndex: number) => {
-        // Filter based on roundSelected (-1 = all, 0 = round 0, 1 = round 1, etc.)
-        if (roundSelected === 1 && roundIndex === 1) return null;
-        if (roundSelected === 2 && roundIndex === 0) return null;
+        // roundSelected: -1 = all, otherwise 1-indexed round number
+        if (roundSelected !== -1 && roundIndex !== roundSelected - 1) return null;
         return (
           <RoundFeedbackTable
             key={roundIndex}

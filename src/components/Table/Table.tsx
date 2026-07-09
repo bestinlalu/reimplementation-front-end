@@ -180,10 +180,16 @@ const Table: React.FC<TableProps> = ({
             )}
           </Col>
           {!disableGlobalFilter && (
-            <span style={{ marginLeft: "5px" }} onClick={toggleGlobalFilter}>
-              <FaSearch style={{ cursor: "pointer" }} />
+            <button
+              type="button"
+              className="btn btn-link p-0 ms-1"
+              onClick={toggleGlobalFilter}
+              aria-expanded={isGlobalFilterVisible}
+              aria-label={`${isGlobalFilterVisible ? "Hide" : "Show"} global search`}
+            >
+              <FaSearch aria-hidden="true" />
               {isGlobalFilterVisible ? " Hide" : " Show"}
-            </span>
+            </button>
           )}
         </Row>
       </Container>
@@ -210,7 +216,7 @@ const Table: React.FC<TableProps> = ({
                                 }}
                               >
                                 {flexRender(header.column.columnDef.header, header.getContext())}
-                                {comment && <ToolTip id="" info={comment} />}
+                                {comment && <ToolTip id={header.id} info={comment} />}
                                 {{
                                   asc: " 🔼",
                                   desc: " 🔽",

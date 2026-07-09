@@ -4,7 +4,8 @@
  * @param str - The input string to capitalize.
  * @returns A string with the first letter capitalized and the rest in lowercase.
  */
-export const capitalizeFirstWord = (str: string) => {
+export const capitalizeFirstWord = (str?: string | null): string => {
+    if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
@@ -14,8 +15,10 @@ export const capitalizeFirstWord = (str: string) => {
  * @param dateString - The input date string.
  * @returns A formatted date string in "MMM DD, YYYY, hh:mm AM/PM" format.
  */
-export const formatDate = (dateString: string): string => {
+export const formatDate = (dateString?: string | null): string => {
+    if (!dateString) return "";
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
     const options: Intl.DateTimeFormatOptions = {
         month: "short",
         day: "numeric",

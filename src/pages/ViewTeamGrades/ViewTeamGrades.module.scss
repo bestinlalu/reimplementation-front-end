@@ -86,6 +86,7 @@
 /* Colors used for coloring score cells within the heatgrid for the grades view */
 /* These classes are returned as plain strings by getColorClass() and used globally
    in FeedbackTable.tsx and ReviewTableRow.tsx, so they must not be locally scoped. */
+/* stylelint-disable selector-pseudo-class-no-unknown */
 :global {
   /* Null space in the table */
   .c0 {
@@ -122,6 +123,7 @@
     background-color: #FFFFFF;
   }
 }
+/* stylelint-enable selector-pseudo-class-no-unknown */
 
 /* Style for the grades in the summary report */
 .grade-circle {
@@ -181,7 +183,7 @@
   font-size: 13px;
   line-height: 1.4;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Last-column tooltip: anchor right so it doesn't overflow the right edge */
@@ -326,6 +328,7 @@
 
 /* Classes used as plain strings in ShowReviews.tsx and FeedbackTable.tsx —
    must not be locally scoped. */
+/* stylelint-disable selector-pseudo-class-no-unknown */
 :global {
   .round-heading {
     font-weight: bold;
@@ -387,6 +390,7 @@
     margin-bottom: 200px;
   }
 }
+/* stylelint-enable selector-pseudo-class-no-unknown */
 
 
 .toggle-container {

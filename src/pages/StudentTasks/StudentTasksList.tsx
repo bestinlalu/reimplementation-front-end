@@ -7,7 +7,7 @@
  * 2. "Revisions" — assignments currently in a revision stage (submissionUpdated flag). Each
  *    entry links to /student_review/list/:participantId so the student can act on feedback.
  *
- * 3. "Students who have teamed with you" — fetched independently via GET /student_tasks/team,
+ * 3. "Students who have teamed with you" — fetched independently via GET /participants/teammates,
  *    which returns { course_name: [full_name, ...] }. Grouped by course with a count badge.
  *    This mirrors the old Expertiza "teamed_students" sidebar panel.
  *
@@ -43,7 +43,7 @@ const StudentTasksList: React.FC<StudentTasksListProps> = ({ revisions }) => {
 
   useEffect(() => {
     axiosClient
-      .get('/student_tasks/team')
+      .get('/participants/teammates')
       .then((res) => setStudentsTeamedWith(res.data || {}))
       .catch((err) => console.error('Error fetching teammates:', err))
       .finally(() => setLoadingTeammates(false));

@@ -270,12 +270,8 @@ const ShowReviews: React.FC<ShowReviewsProps> = ({ data, roundSelected, targetRe
   const rounds = data.length;
   const [expandAllReviews, setExpandAllReviews] = useState(false);
 
-  const auth = useSelector(
-    (state: RootState) => state.authentication,
-    (prev, next) => prev.isAuthenticated === next.isAuthenticated
-  );
-
-  const isStudent = auth.user.role === "Student";
+  const role = useSelector((state: RootState) => state.authentication.user?.role);
+  const isStudent = role === "Student";
 
   // Render collapsible rounds
   const renderReviews = () => {

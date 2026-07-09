@@ -90,11 +90,10 @@ const ReviewTable: React.FC = () => {
   const [averageFinalScore, setAverageFinalScore] = useState<string | number | null>(null);
   const authUser = useSelector((state: any) => state.authentication?.user);
 
-  // Auto-fetch assignment from URL parameter or default to 1 on mount
+  // Re-fetch whenever the assignmentId query parameter changes
   useEffect(() => {
     fetchBackend(assignmentId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [assignmentId]);
 
 
 
