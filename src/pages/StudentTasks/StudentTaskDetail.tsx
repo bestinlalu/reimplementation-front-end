@@ -12,7 +12,7 @@
  * Timeline rendering:
  *   - timeline entries are sorted by date and displayed as three aligned rows:
  *       Row 1: formatted date + time labels
- *       Row 2: visual track line with coloured nodes (completed=red filled, current=pulsing,
+ *       Row 2: visual track line with colored nodes (completed=red filled, current=pulsing,
  *               pending=grey outline)
  *       Row 3: deadline names, linked to /responses/:id for submitted responses
  *   - progressPercent drives a CSS linear-gradient on the track line so the red portion
